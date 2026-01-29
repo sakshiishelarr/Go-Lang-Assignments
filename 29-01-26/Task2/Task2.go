@@ -19,11 +19,11 @@ type department struct {
 	empList []employee
 }
 
-func (d department) addEmployeeMethod(e *employee) {
+func (d *department) addEmployeeMethod(e *employee) {
 	d.empList = append(d.empList, *e)
 }
 
-func (d department) avgSalaryMethod(e *employee) {
+func (d department) avgSalaryMethod(e employee) {
 	sum := 0
 	count := 0
 
@@ -84,7 +84,7 @@ func main() {
 		dept.addEmployeeMethod(&emp)
 		fmt.Printf("Entire list: %v", employeeList)
 
-		dept.avgSalaryMethod(&emp)
+		dept.avgSalaryMethod(emp)
 		dept.removeEmployeeMethod(emp)
 
 		
