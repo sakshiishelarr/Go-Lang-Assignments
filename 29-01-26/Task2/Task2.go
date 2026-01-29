@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"slices"
+)
 
 type employee struct {
 	empId         int
@@ -8,10 +11,6 @@ type employee struct {
 	empAge        int
 	empSalary     int
 	empDepartment string
-}
-
-func (e *employee) giveRaise(raise int) {
-	e.empSalary += raise
 }
 
 type department struct {
@@ -23,7 +22,7 @@ func (d *department) addEmployeeMethod(e *employee) {
 	d.empList = append(d.empList, *e)
 }
 
-func (d department) avgSalaryMethod(e employee) {
+func (d department) avgSalaryMethod() {
 	sum := 0
 	count := 0
 
@@ -40,58 +39,84 @@ func (d department) avgSalaryMethod(e employee) {
 
 }
 
-func (d department) removeEmployeeMethod(e employee) {
-	e = employee{}
+func (d *department) removeEmployeeMethod(id int) {
+	for i,val := range(d.empList){
+		if val.empId==id{
+			d.empList = slices.Delete(d.empList,i,i+1)
+			return
+		}
+	}
+}
+func (d *department) giveRaise(id int,raise int) {
+	for i := range d.empList {
+		if d.empList[i].empId == id {
+			d.empList[i].empSalary += raise
+			return
+		}
+	}
 }
 
-func main() {
-	emp := employee{}
 
+func main() {
+	
+	var chooseOperation int
 	var raise int
+	var employeeList = make([]employee, 0)
+	dept := department{"", employeeList}
+	var id int
 
 	for {
-		deptname := ""
-		fmt.Println("Employe department(GoLang/DevOps/DotNet): ")
-		fmt.Scan(&deptname)
-		emp.empDepartment = deptname
-
-		fmt.Println("Enter employee details: ")
-		fmt.Println("Employee Id: ")
-		fmt.Scan(&emp.empId)
-
-		fmt.Println("Employe name: ")
-		fmt.Scan(&emp.empName)
-
-		fmt.Println("Employee age: ")
-		fmt.Scan(&emp.empAge)
-
-		fmt.Println("Employee Salary: ")
-		fmt.Scan(&emp.empSalary)
-
-		fmt.Printf("Hi my id is %v, name is %v, my age is %v, my salary is %v, my dept is %v", emp.empId, emp.empName, emp.empAge, emp.empSalary, emp.empDepartment)
 
 		fmt.Println("\n\nWelcome to employee database & department management")
 
-		// fmt.Println("\n\nEnter the operation u wanna perform: ")
-		// fmt.Println("1.Add Employee \n2.Remove Employee \n3.Average salary of department \n4.Give raise to employee")
-		// fmt.Scan(&chooseOperation)
+		fmt.Println("\n\nEnter the operation u wanna perform: ")
+		fmt.Println("1.Add Employee \n2.Remove Employee \n3.Average salary of department \n4.Give raise to employee\n5.Exit")
+		fmt.Scan(&chooseOperation)
 
-		var employeeList = make([]employee, 0)
+		if chooseOperation==5{
+			break
+		}
 
-		dept := department{deptname, employeeList}
+		emp := employee{}
+		switch chooseOperation{
+		case 1:
+			fmt.Println("Enter employee details: ")
+			fmt.Println("Employee Id: ")
+			fmt.Scan(&emp.empId)
 
-		employeeList = append(employeeList, emp)
-		dept.addEmployeeMethod(&emp)
-		fmt.Printf("Entire list: %v", employeeList)
+			fmt.Println("Employe name: ")
+			fmt.Scan(&emp.empName)
 
-		dept.avgSalaryMethod(emp)
-		dept.removeEmployeeMethod(emp)
+			fmt.Println("Employee age: ")
+			fmt.Scan(&emp.empAge)
 
+			fmt.Println("Employee Salary: ")
+			fmt.Scan(&emp.empSalary)
+
+			fmt.Println("Employe department(GoLang/DevOps/DotNet): ")
+			fmt.Scan(&emp.empDepartment)
+
+			fmt.Printf("Hi my id is %v, name is %v, my age is %v, my salary is %v, my dept is %v", emp.empId, emp.empName, emp.empAge, emp.empSalary, emp.empDepartment)
+			dept.addEmployeeMethod(&emp)
+			fmt.Printf("Entire list: %v", dept.empList)
+
+		case 2:
+			fmt.Println("Enter id of employee you want to remove: ")
+			fmt.Scan(&id)
+			dept.removeEmployeeMethod(id)
+			fmt.Println("Employee successfully rmeoved")
+			fmt.Printf("New list: %v",dept.empList)
+		case 3:
+			dept.avgSalaryMethod()
+		case 4:
+			fmt.Printf("Enter id of employee you want to give a raise to: ")
+			fmt.Scan(&id)
+			fmt.Println("Enter the raise amount: ")
+			fmt.Scan(&raise)
+
+			dept.giveRaise(id,raise)
+			fmt.Printf("New list: %v",dept.empList)
+		}
 		
-
-		fmt.Println("Enter the raise amount: ")
-		fmt.Scan(&raise)
-		emp.giveRaise(raise)
-
 	}
 }
