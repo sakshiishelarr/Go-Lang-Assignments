@@ -5,23 +5,26 @@ import (
 	"sync"
 )
 
-func sendData(myChannel chan<- int, numberOfJobs int) { //send only channel
+//sends jobs onto channel
+func sendData(myChannel chan<- int, numberOfJobs int) { 
 	for i := 0; i < numberOfJobs; i++ {
-		myChannel <- i  //sends jobs onto the channel.Each channel waits until channel has space then puts job
+		myChannel <- i  
 	}
-	close(myChannel) 	//closed channel or else workers will wait forever
+
+	close(myChannel) 	
 	fmt.Println("Jobs added to channel")
 }
 
-func worker(myChannel <-chan int, numberOfWorkers int, wg *sync.WaitGroup) { //receive only channel. uses wg to indicate compleiton
+//processes jobs per worker
+func worker(myChannel <-chan int, numberOfWorkers int, wg *sync.WaitGroup) { 
 
-	
-	for i := 0; i < numberOfWorkers; i++ {		//creates workers
+	//creates workers
+	for i := 0; i < numberOfWorkers; i++ {		
 
-		go func(workerID int) {					//new go routine per worker
+		go func(workerID int) {					
 			defer wg.Done()
 
-			for value := range myChannel {		//keep receiving from channel
+			for value := range myChannel {		
 				fmt.Printf("Job %d processed by worker %d\n", value, workerID)
 			}
 		}(i)
@@ -40,13 +43,12 @@ func main() {
 	fmt.Println("Enter number of workers:")
 	fmt.Scan(&numberOfWorkers)
 
-	myChannel := make(chan int, numberOfJobs)		//buffered channel so sender doesnt blocck immediately
-
+	myChannel := make(chan int, numberOfJobs)		
 	
 	wg.Add(numberOfWorkers)						
-	go worker(myChannel, numberOfWorkers, &wg)
+	worker(myChannel, numberOfWorkers, &wg)
 
-	go sendData(myChannel, numberOfJobs)
+	sendData(myChannel, numberOfJobs)
 
 	wg.Wait()
 	fmt.Println("All jobs processed")
