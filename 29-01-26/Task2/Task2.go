@@ -1,20 +1,19 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
-	"slices"
-	"bufio"
 	"os"
+	"slices"
 	"strings"
 )
 
 type employee struct {
-	empId         int
-	empName       string
-	empAge        int
-	empSalary     int
-	empDepartment string
+	empId     int
+	empName   string
+	empAge    int
+	empSalary int
 }
 
 type department struct {
@@ -22,49 +21,120 @@ type department struct {
 	empList []employee
 }
 
+func (d *department) addEmployeeMethod(reader *bufio.Reader) {
+	emp := employee{}
+	var err error
 
-func (d *department) addEmployeeMethod(e *employee) {
-	d.empList = append(d.empList, *e)
+	fmt.Println("Enter employee id: ")
+	_, err = fmt.Scan(&emp.empId)
+	findError(err)
+	fmt.Scanln()
+
+	fmt.Println("Enter employee name: ")
+	name, _ := reader.ReadString('\n')
+	emp.empName = strings.TrimSpace(name)
+
+	fmt.Println("Enter employee age: ")
+	_, err = fmt.Scan(&emp.empAge)
+	findError(err)
+
+	fmt.Println("Enter employe salary: ")
+	_, err = fmt.Scan(&emp.empSalary)
+	findError(err)
+	fmt.Scanln()
+
+	d.empList = append(d.empList, emp)
+	fmt.Println("Employee added successfully!")
+	fmt.Println("Company Data: ")
+	d.printDepartment()
+
 }
 
-func (d department) avgSalaryMethod() {
-	if len(d.empList) == 0{
-		fmt.Println("No employees in department")
+func (d *department) printDepartment() {
+	fmt.Println("\nDepartment:", d.depName)
+
+	if len(d.empList) == 0 {
+		fmt.Println("No employees")
+	}
+
+	for _, emp := range d.empList {
+		fmt.Printf("\n  ID: %v | Name: %v | Age: %v | Salary: %v\n", emp.empId, emp.empName, emp.empAge, emp.empSalary)
+	}
+}
+
+func (d *department) avgSalaryMethod() {
+	fmt.Println("\nExisting data: ")
+	d.printDepartment()
+
+	if len(d.empList) == 0 {
+		fmt.Println("No employees in this department")
 		return
 	}
 
 	sum := 0
-	count := 0
-	fmt.Println("length    ", len(d.empList))
-	for _, value := range d.empList {
-		sum += value.empSalary
-		count++
+	for _, emp := range d.empList {
+		sum += emp.empSalary
 	}
 
-	fmt.Println("count:::", count)
-	averageSalary := sum / count
-	fmt.Printf("The average salary of all employees is: %d", averageSalary)
-
+	averageSalary := sum / len(d.empList)
+	fmt.Printf("Average salary of %s department: %d\n", d.depName, averageSalary)
 }
 
-func (d *department) removeEmployeeMethod(id int) {
-	for i, val := range d.empList {
-		if val.empId == id {
+func (d *department) removeEmployeeMethod(reader *bufio.Reader) {
+	if len(d.empList) == 0 {
+		fmt.Println("No employees to remove")
+		return
+	}
+
+	fmt.Println("\nExisting data: ")
+	d.printDepartment()
+
+	var id int
+	fmt.Println("Enter Employee Id: ")
+	fmt.Scan(&id)
+	reader.ReadString('\n')
+
+	for i, emp := range d.empList {
+		if emp.empId == id {
 			d.empList = slices.Delete(d.empList, i, i+1)
-			fmt.Println("Employee deleted successfully!")
+			fmt.Println("\nEmployee removed successfully")
+			fmt.Printf("\nNew data: ")
+			d.printDepartment()
 			return
 		}
 	}
-	fmt.Println("Employe with given id not found")
+
+	fmt.Println("Employee not found ")
 }
-func (d *department) giveRaise(id int, raise int) {
+
+func (d *department) giveRaise() {
+	if len(d.empList) == 0 {
+		fmt.Println("No employees in department")
+		return
+	}
+
+	fmt.Printf("\nExisting data: ")
+	d.printDepartment()
+
+	var id int
+	var raise int
+
+	fmt.Println("Enter employee id: ")
+	fmt.Scan(&id)
+
+	fmt.Println("Enter raise amount: ")
+	fmt.Scan(&raise)
+
 	for i := range d.empList {
 		if d.empList[i].empId == id {
 			d.empList[i].empSalary += raise
-			fmt.Printf("Raise %v given to employee with id %v",raise,id)
+			fmt.Printf("Raise given to employee %v ", id)
+			fmt.Println("New data: ")
+			d.printDepartment()
 			return
 		}
 	}
+	fmt.Println("Employee not found")
 }
 
 func findError(err error) bool {
@@ -82,109 +152,81 @@ func findError(err error) bool {
 func main() {
 
 	var chooseOperation int
-	var raise int
-	var id int
+	var err error
 
 	reader := bufio.NewReader(os.Stdin)
-	dept := department{"", make([]employee, 0)}
-	
+	department1 := make([]department, 0)
 
 	for {
 
 		fmt.Println("\n\nWelcome to employee database & department management")
 		fmt.Println("\n\nEnter the operation u wanna perform: ")
 		fmt.Println("1.Add Employee \n2.Remove Employee \n3.Average salary of department \n4.Give raise to employee\n5.Exit")
-		
-		if _,err:=fmt.Scan(&chooseOperation); findError(err){
-			fmt.Scanln()
-			continue
-		}
+
+		_, err = fmt.Scan(&chooseOperation)
+		reader.ReadString('\n') // clears \n or else we wont move ahead to next input
+		findError(err)
 
 		if chooseOperation == 5 {
 			fmt.Println("Exiting Application")
 			break
 		}
 
-		
-		switch chooseOperation {
-		case 1:
-			emp := employee{}
+		for chooseOperation != 5 {
+			fmt.Println("Enter department name: ")
+			inputDeptName, _ := reader.ReadString('\n')
+			inputDeptName = strings.TrimSpace(inputDeptName)
 
-			fmt.Println("Enter employee details: ")
-			fmt.Println("Employee Id: ")
-			if _,err:= fmt.Scan(&emp.empId); findError(err){
-				fmt.Scanln()
-				continue
-			}
-			fmt.Scanln() //clear buffer before reading string
+			found := false
 
+			for i := range department1 {
+				if department1[i].depName == inputDeptName {
+					found = true
 
-			fmt.Println("Employe name: ")
-			nameInput,_ := reader.ReadString('\n')
-			emp.empName = strings.TrimSpace(nameInput)
+					switch chooseOperation {
+					case 1:
+						department1[i].addEmployeeMethod(reader)
 
-			fmt.Println("Employee age: ")
-			if _, err := fmt.Scan(&emp.empAge); findError(err) || emp.empAge <=0 {
-				fmt.Println("Age must be greater than 0")
-				fmt.Scanln()
-				continue
-			}
-		
+					case 2:
+						department1[i].removeEmployeeMethod(reader)
 
+					case 3:
+						department1[i].avgSalaryMethod()
 
-			fmt.Println("Employee Salary: ")
-			if _, err := fmt.Scan(&emp.empSalary); findError(err){
-				fmt.Println("Salary must be greater than 0")
-				fmt.Scanln()
-				continue
+					case 4:
+						department1[i].giveRaise()
+
+					default:
+						fmt.Println("Invalid option. Choose between 1-5")
+					}
+					break
+
+				}
 			}
 
-			fmt.Scanln() //clear buffer to take string
+			if !found && chooseOperation == 1 {
+				newDept := department{
+					depName: inputDeptName,
+					empList: make([]employee, 0),
+				}
+				newDept.addEmployeeMethod(reader)
 
-		
-			fmt.Println("Employe department(GoLang/DevOps/DotNet): ")
-			deptInput,_ := reader.ReadString('\n')
-			emp.empDepartment = strings.TrimSpace(deptInput)
+				department1 = append(department1, newDept)
 
-			fmt.Printf("Hi my id is %v, name is %v, my age is %v, my salary is %v, my dept is %v", emp.empId, emp.empName, emp.empAge, emp.empSalary, emp.empDepartment)
-			
-			dept.addEmployeeMethod(&emp)
-			fmt.Printf("Entire list: %v", dept.empList)
+			} else if !found {
+				fmt.Println("Department not found")
 
-		case 2:
-			fmt.Println("Enter id of employee you want to remove: ")
-			if _, err := fmt.Scan(&id); findError(err){
-				fmt.Scanln()
-				continue
+			} else {
+				if len(department1) == 0 {
+					fmt.Println("No departments available")
+					continue
+				}
+
+				for i := range department1 {
+					department1[i].printDepartment()
+				}
 			}
-
-			dept.removeEmployeeMethod(id)
-			fmt.Println("Employee successfully rmeoved")
-			fmt.Printf("New list: %v", dept.empList)
-
-		case 3:
-			dept.avgSalaryMethod()
-
-		case 4:
-			fmt.Printf("Enter id of employee you want to give a raise to: ")
-			if _, err := fmt.Scan(&id); findError(err){
-				fmt.Scanln()
-				continue
-			}
-			
-			fmt.Println("Enter the raise amount: ")
-			if _, err := fmt.Scan(&raise); findError(err) || raise<=0{
-				fmt.Println("Raise must be greater than 0")
-				fmt.Scanln()
-				continue
-			}
-			
-			dept.giveRaise(id, raise)
-			fmt.Printf("New list: %v", dept.empList)
-			
-		default:
-			fmt.Println("Invalid option. Choose between 1-5")
+			break //did not move to next iteration
 		}
-
 	}
 }
