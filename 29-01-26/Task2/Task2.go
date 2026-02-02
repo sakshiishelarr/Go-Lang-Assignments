@@ -7,8 +7,10 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"strconv"
 )
 
+// stores data of an empoloyee
 type employee struct {
 	empId     int
 	empName   string
@@ -16,33 +18,61 @@ type employee struct {
 	empSalary int
 }
 
+// name of department and employee list
 type department struct {
 	depName string
 	empList []employee
 }
 
+// adds new employee
 func (d *department) addEmployeeMethod(reader *bufio.Reader) {
-	emp := employee{}
-	var err error
+	emp := employee{} //instance of employee struct
 
-	fmt.Println("Enter employee id: ")
-	_, err = fmt.Scan(&emp.empId)
-	findError(err)
-	fmt.Scanln()
+	fmt.Println("Enter unique employee id: ")
+	inputId,_ := reader.ReadString('\n')
+	inputId = strings.TrimSpace(inputId)
+	id, err := strconv.Atoi(inputId)
+	if err!=nil || id<=0 {
+		fmt.Println("Id should be a positive number")
+		return
+	}
+	for i:= range d.empList{
+		if d.empList[i].empId == id{
+			fmt.Println("Id already exists. Cannot add 2 employees with same id!")
+			return
+		}
+	}
+	emp.empId = id
 
+	
 	fmt.Println("Enter employee name: ")
-	name, _ := reader.ReadString('\n')
+	name, err := reader.ReadString('\n')
 	emp.empName = strings.TrimSpace(name)
+	if findError(err) {
+		return
+	}
 
 	fmt.Println("Enter employee age: ")
-	_, err = fmt.Scan(&emp.empAge)
-	findError(err)
+	inputAge,_ := reader.ReadString('\n')
+	inputAge = strings.TrimSpace(inputAge)
+	age, err := strconv.Atoi(inputAge)
+	if err!=nil || age<=0{
+		fmt.Println("Age should be a positive number")
+		return
+	}
+	emp.empAge = age
 
-	fmt.Println("Enter employe salary: ")
-	_, err = fmt.Scan(&emp.empSalary)
-	findError(err)
-	fmt.Scanln()
+	fmt.Println("Enter employee salary: ")
+	inputSalary,_ := reader.ReadString('\n')
+	inputSalary = strings.TrimSpace(inputSalary)
+	salary, err := strconv.Atoi(inputSalary)
+	if err!=nil || salary<=0{
+		fmt.Println("Salary should be a positive number")
+		return
+	}
+	emp.empSalary = salary
 
+	
 	d.empList = append(d.empList, emp)
 	fmt.Println("Employee added successfully!")
 	fmt.Println("Company Data: ")
@@ -50,6 +80,7 @@ func (d *department) addEmployeeMethod(reader *bufio.Reader) {
 
 }
 
+// prints entire company data
 func (d *department) printDepartment() {
 	fmt.Println("\nDepartment:", d.depName)
 
@@ -62,24 +93,7 @@ func (d *department) printDepartment() {
 	}
 }
 
-func (d *department) avgSalaryMethod() {
-	fmt.Println("\nExisting data: ")
-	d.printDepartment()
-
-	if len(d.empList) == 0 {
-		fmt.Println("No employees in this department")
-		return
-	}
-
-	sum := 0
-	for _, emp := range d.empList {
-		sum += emp.empSalary
-	}
-
-	averageSalary := sum / len(d.empList)
-	fmt.Printf("Average salary of %s department: %d\n", d.depName, averageSalary)
-}
-
+// remove employee based on ID
 func (d *department) removeEmployeeMethod(reader *bufio.Reader) {
 	if len(d.empList) == 0 {
 		fmt.Println("No employees to remove")
@@ -107,6 +121,26 @@ func (d *department) removeEmployeeMethod(reader *bufio.Reader) {
 	fmt.Println("Employee not found ")
 }
 
+// average salary of one department
+func (d *department) avgSalaryMethod() {
+	fmt.Println("\nExisting data: ")
+	d.printDepartment()
+
+	if len(d.empList) == 0 {
+		fmt.Println("No employees in this department")
+		return
+	}
+
+	sum := 0
+	for _, emp := range d.empList {
+		sum += emp.empSalary
+	}
+
+	averageSalary := sum / len(d.empList)
+	fmt.Printf("Average salary of %v department: %v\n", d.depName, averageSalary)
+}
+
+// give raise to employee based on id
 func (d *department) giveRaise() {
 	if len(d.empList) == 0 {
 		fmt.Println("No employees in department")
@@ -137,6 +171,7 @@ func (d *department) giveRaise() {
 	fmt.Println("Employee not found")
 }
 
+// generic error fucntion
 func findError(err error) bool {
 	if err != nil {
 		if err == io.EOF || err == io.ErrUnexpectedEOF {
@@ -154,7 +189,9 @@ func main() {
 	var chooseOperation int
 	var err error
 
-	reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(os.Stdin) //instance of bufio struct
+
+	//instance of department struct
 	department1 := make([]department, 0)
 
 	for {
@@ -220,10 +257,6 @@ func main() {
 				if len(department1) == 0 {
 					fmt.Println("No departments available")
 					continue
-				}
-
-				for i := range department1 {
-					department1[i].printDepartment()
 				}
 			}
 			break //did not move to next iteration
