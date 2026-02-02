@@ -105,8 +105,15 @@ func (d *department) removeEmployeeMethod(reader *bufio.Reader) {
 
 	var id int
 	fmt.Println("Enter Employee Id: ")
-	fmt.Scan(&id)
-	reader.ReadString('\n')
+	inputId,_:=reader.ReadString('\n')
+	inputId = strings.TrimSpace(inputId)
+
+	id,err := strconv.Atoi(inputId)
+	if findError(err){
+		return
+	}
+
+
 
 	for i, emp := range d.empList {
 		if emp.empId == id {
@@ -141,7 +148,7 @@ func (d *department) avgSalaryMethod() {
 }
 
 // give raise to employee based on id
-func (d *department) giveRaise() {
+func (d *department) giveRaise(reader *bufio.Reader) {
 	if len(d.empList) == 0 {
 		fmt.Println("No employees in department")
 		return
@@ -150,14 +157,23 @@ func (d *department) giveRaise() {
 	fmt.Printf("\nExisting data: ")
 	d.printDepartment()
 
-	var id int
-	var raise int
+	
 
 	fmt.Println("Enter employee id: ")
-	fmt.Scan(&id)
+	inputId,_:=reader.ReadString('\n')
+	inputId = strings.TrimSpace(inputId)
+	id,err := strconv.Atoi(inputId)
+	if findError(err){
+		return
+	}
 
 	fmt.Println("Enter raise amount: ")
-	fmt.Scan(&raise)
+	inputRaise,_:=reader.ReadString('\n')
+	inputRaise = strings.TrimSpace(inputRaise)
+	raise,err := strconv.Atoi(inputRaise)
+	if findError(err){
+		return
+	}
 
 	for i := range d.empList {
 		if d.empList[i].empId == id {
@@ -231,7 +247,7 @@ func main() {
 						department1[i].avgSalaryMethod()
 
 					case 4:
-						department1[i].giveRaise()
+						department1[i].giveRaise(reader)
 
 					default:
 						fmt.Println("Invalid option. Choose between 1-5")
