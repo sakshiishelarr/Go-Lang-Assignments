@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 	"strconv"
+	"regexp"
 )
 
 // stores data of an empoloyee
@@ -32,7 +33,7 @@ func (d *department) addEmployeeMethod(reader *bufio.Reader) {
 	inputId,_ := reader.ReadString('\n')
 	inputId = strings.TrimSpace(inputId)
 	id, err := strconv.Atoi(inputId)
-	if err!=nil || id<=0 {
+	if findError(err) || id<=0 {
 		fmt.Println("Id should be a positive number")
 		return
 	}
@@ -47,16 +48,22 @@ func (d *department) addEmployeeMethod(reader *bufio.Reader) {
 	
 	fmt.Println("Enter employee name: ")
 	name, err := reader.ReadString('\n')
-	emp.empName = strings.TrimSpace(name)
+	name = strings.TrimSpace(name)
+	hasDigits, _ := regexp.MatchString(`[0-9]`,name)
 	if findError(err) {
 		return
 	}
+	if hasDigits{
+		fmt.Println("Error: Input cannot contain numbers")
+		return
+	}
+	emp.empName = name
 
 	fmt.Println("Enter employee age: ")
 	inputAge,_ := reader.ReadString('\n')
 	inputAge = strings.TrimSpace(inputAge)
 	age, err := strconv.Atoi(inputAge)
-	if err!=nil || age<=0{
+	if findError(err) || age<=0{
 		fmt.Println("Age should be a positive number")
 		return
 	}
@@ -66,7 +73,7 @@ func (d *department) addEmployeeMethod(reader *bufio.Reader) {
 	inputSalary,_ := reader.ReadString('\n')
 	inputSalary = strings.TrimSpace(inputSalary)
 	salary, err := strconv.Atoi(inputSalary)
-	if err!=nil || salary<=0{
+	if findError(err) || salary<=0{
 		fmt.Println("Salary should be a positive number")
 		return
 	}
@@ -229,6 +236,10 @@ func main() {
 			fmt.Println("Enter department name: ")
 			inputDeptName, _ := reader.ReadString('\n')
 			inputDeptName = strings.TrimSpace(inputDeptName)
+			// hasDigits, _ := regexp.MatchString(`[0-9]`, inputDeptName)
+			// if hasDigits{
+			// 	fmt.Println("Error: Department name cannot contain numbers")
+			// }
 
 			found := false
 
