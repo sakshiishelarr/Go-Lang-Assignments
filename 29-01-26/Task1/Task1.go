@@ -8,7 +8,8 @@ import (
 	"strings"
 )
 
-type Person struct { //to store details of one user
+//store details of one user
+type Person struct {
 	name string
 	age  int
 }
@@ -16,22 +17,22 @@ type Person struct { //to store details of one user
 
 //takes name & age input. returns faslse when user enters exit.
 func (p *Person) UserInput(reader *bufio.Reader) bool {
-	//to take name input
+
 	fmt.Println("Enter your name(type 'EXIT' to exit application): ")
 	name, _ := reader.ReadString('\n')
 	p.name = strings.TrimSpace(name)
 
-	//if user enters exit, program stops.
+
 	if strings.EqualFold(p.name, "exit") {
 		return false
 	}
 
-	//to take age input
+
 	fmt.Println("Enter your age: ")
 	ageInput, _ := reader.ReadString('\n')
 	ageInput = strings.TrimSpace(ageInput)
 
-	//convert age from string to number
+
 	age, err := strconv.Atoi(ageInput)
 	if err != nil {
 		fmt.Println("Age must be a number")
@@ -104,7 +105,6 @@ func main() {
 		}
 		isValidName, isValidAge := user.validateInputs()
 
-		//if inputs are valid then only shows the menu
 		if isValidName && isValidAge {
 
 			//inner for loop to show menu for the same user
@@ -124,7 +124,6 @@ func main() {
 					break
 				}
 
-				//execute based on user's actions
 				switch choice {
 				case 1:
 					user.introduceMyself()
@@ -137,7 +136,7 @@ func main() {
 				}
 			}
 		} else {
-			//if name and age are not valid show errors
+	
 			if !isValidName {
 				fmt.Println("Your name is too short")
 			}
